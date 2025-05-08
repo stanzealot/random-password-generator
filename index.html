@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Password Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #333;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+      }
+      pre {
+        background-color: #f5f5f5;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      code {
+        font-family: 'Courier New', Courier, monospace;
+      }
+      .output {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      input[type='number'],
+      select {
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      label {
+        margin-right: 10px;
+      }
+      .checkbox-group {
+        margin: 10px 0;
+      }
+      .strength-meter {
+        height: 10px;
+        background-color: #eee;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .strength-meter-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Random Password Generator</h1>
+
+    <p>
+      A TypeScript implementation of a secure random password generator with
+      configurable length and character sets.
+    </p>
+
+    <h2>Generate a Password</h2>
+
+    <div>
+      <label for="length">Password Length:</label>
+      <input type="number" id="length" min="4" max="100" value="12" />
+    </div>
+
+    <div class="checkbox-group">
+      <label
+        ><input type="checkbox" id="uppercase" checked /> Include Uppercase
+        Letters</label
+      >
+    </div>
+
+    <div class="checkbox-group">
+      <label
+        ><input type="checkbox" id="lowercase" checked /> Include Lowercase
+        Letters</label
+      >
+    </div>
+
+    <div class="checkbox-group">
+      <label
+        ><input type="checkbox" id="numbers" checked /> Include Numbers</label
+      >
+    </div>
+
+    <div class="checkbox-group">
+      <label
+        ><input type="checkbox" id="special" checked /> Include Special
+        Characters</label
+      >
+    </div>
+
+    <button id="generate">Generate Password</button>
+
+    <div class="output">
+      <p>
+        Generated Password:
+        <strong id="password-output"
+          >Click "Generate Password" to create one</strong
+        >
+      </p>
+      <div>
+        <p>Password Strength: <span id="strength-value">0</span>/100</p>
+        <div class="strength-meter">
+          <div
+            class="strength-meter-fill"
+            id="strength-meter"
+            style="width: 0%; background-color: #ff0000"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>View Source Code</h2>
+
+    <p>
+      You can view the source code and documentation on
+      <a
+        href="https://github.com/stanzealot/random-password-generator"
+        target="_blank"
+        >GitHub</a
+      >.
+    </p>
+
+    <script>
+      const CHAR_SETS = {
+        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        lowercase: 'abcdefghijklmnopqrstuvwxyz',
+        numbers: '0123456789',
+        specialChars: '!@#$%^&*()_+~`|}{[]\\:;?><,./-=',
+      };
+
+      function containsCharFrom(str, charSet) {
+        for (let i = 0; i < str.length; i++) {
+          if (charSet.includes(str.charAt(i))) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function generatePassword(options = {}) {
+        const defaultOptions = {
+          length: 12,
+          includeUppercase: true,
+          includeLowercase: true,
+          includeNumbers: true,
+          includeSpecialChars: true,
+        };
+
+        const mergedOptions = { ...defaultOptions, ...options };
+
+        const {
+          length,
+          includeUppercase,
+          includeLowercase,
+          includeNumbers,
+          includeSpecialChars,
+        } = mergedOptions;
+
+        if (length <= 0) {
+          throw new Error('Password length must be greater than 0');
+        }
+
+        if (
+          !includeUppercase &&
+          !includeLowercase &&
+          !includeNumbers &&
+          !includeSpecialChars
+        ) {
+          throw new Error('At least one character type must be selected');
+        }
+
+        let charPool = '';
+        if (includeUppercase) charPool += CHAR_SETS.uppercase;
+        if (includeLowercase) charPool += CHAR_SETS.lowercase;
+        if (includeNumbers) charPool += CHAR_SETS.numbers;
+        if (includeSpecialChars) charPool += CHAR_SETS.specialChars;
+
+        let password = '';
+        let hasRequiredChars = false;
+
+        while (!hasRequiredChars) {
+          password = '';
+
+          for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charPool.length);
+            password += charPool.charAt(randomIndex);
+          }
+
+          hasRequiredChars = true;
+
+          if (
+            includeUppercase &&
+            !containsCharFrom(password, CHAR_SETS.uppercase)
+          ) {
+            hasRequiredChars = false;
+          }
+
+          if (
+            includeLowercase &&
+            !containsCharFrom(password, CHAR_SETS.lowercase)
+          ) {
+            hasRequiredChars = false;
+          }
+
+          if (
+            includeNumbers &&
+            !containsCharFrom(password, CHAR_SETS.numbers)
+          ) {
+            hasRequiredChars = false;
+          }
+
+          if (
+            includeSpecialChars &&
+            !containsCharFrom(password, CHAR_SETS.specialChars)
+          ) {
+            hasRequiredChars = false;
+          }
+        }
+
+        return password;
+      }
+
+      function calculatePasswordStrength(password) {
+        if (!password) return 0;
+
+        let score = 0;
+
+        score += Math.min(password.length * 4, 40);
+
+        if (containsCharFrom(password, CHAR_SETS.lowercase)) score += 10;
+        if (containsCharFrom(password, CHAR_SETS.uppercase)) score += 15;
+        if (containsCharFrom(password, CHAR_SETS.numbers)) score += 15;
+        if (containsCharFrom(password, CHAR_SETS.specialChars)) score += 20;
+
+        return Math.min(score, 100);
+      }
+
+      function updatePasswordStrength(password) {
+        const strength = calculatePasswordStrength(password);
+        const strengthElement = document.getElementById('strength-value');
+        const meterElement = document.getElementById('strength-meter');
+
+        strengthElement.textContent = strength;
+        meterElement.style.width = `${strength}%`;
+
+        if (strength < 30) {
+          meterElement.style.backgroundColor = '#ff0000';
+        } else if (strength < 60) {
+          meterElement.style.backgroundColor = '#ff9900';
+        } else if (strength < 80) {
+          meterElement.style.backgroundColor = '#cccc00';
+        } else {
+          meterElement.style.backgroundColor = '#00cc00';
+        }
+      }
+
+      document
+        .getElementById('generate')
+        .addEventListener('click', function () {
+          try {
+            const length = parseInt(
+              document.getElementById('length').value,
+              10
+            );
+            const includeUppercase =
+              document.getElementById('uppercase').checked;
+            const includeLowercase =
+              document.getElementById('lowercase').checked;
+            const includeNumbers = document.getElementById('numbers').checked;
+            const includeSpecialChars =
+              document.getElementById('special').checked;
+
+            const password = generatePassword({
+              length,
+              includeUppercase,
+              includeLowercase,
+              includeNumbers,
+              includeSpecialChars,
+            });
+
+            document.getElementById('password-output').textContent = password;
+            updatePasswordStrength(password);
+          } catch (error) {
+            alert(error.message);
+          }
+        });
+    </script>
+  </body>
+</html>
